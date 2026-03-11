@@ -34,7 +34,7 @@ export default function LineChart({
       <div className="chart-container" style={{ height }}>
         {title && <h4 className="chart-title">{title}</h4>}
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 20 }}>
+          <BarChart data={chartData} margin={{ top: 20, right: 24, left: 16, bottom: 24 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--borde)" opacity={0.5} />
             <XAxis
               dataKey="name"
@@ -67,7 +67,7 @@ export default function LineChart({
     <div className="chart-container" style={{ height }}>
       {title && <h4 className="chart-title">{title}</h4>}
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 20 }}>
+        <AreaChart data={chartData} margin={{ top: 20, right: 24, left: 16, bottom: 24 }}>
           <defs>
             <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="var(--acento1)" stopOpacity={0.3} />

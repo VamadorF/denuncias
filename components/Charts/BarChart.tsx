@@ -12,6 +12,9 @@ import {
 } from "recharts";
 import { COLORS } from "@/lib/constants";
 
+const truncateLabel = (str: string, max = 45) =>
+  str.length > max ? str.slice(0, max) + "…" : str;
+
 interface BarChartProps {
   data: { name: string; value: number }[];
   horizontal?: boolean;
@@ -29,7 +32,11 @@ export default function BarChart({
 }: BarChartProps) {
   if (!data || data.length === 0) return null;
 
-  const chartData = data.map((d) => ({ name: d.name, value: d.value }));
+  const chartData = data.map((d) => ({
+    name: d.name,
+    nameFull: d.name,
+    value: d.value,
+  }));
 
   return (
     <div className="chart-container" style={{ height }}>
@@ -38,19 +45,30 @@ export default function BarChart({
         <RechartsBarChart
           data={chartData}
           layout={horizontal ? "vertical" : "horizontal"}
-          margin={{ top: 10, right: 20, left: 10, bottom: 20 }}
+          margin={
+            horizontal
+              ? { top: 16, right: 32, left: 8, bottom: 16 }
+              : { top: 24, right: 24, left: 16, bottom: 100 }
+          }
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--borde)" opacity={0.5} />
           {horizontal ? (
             <>
-              <XAxis type="number" stroke="var(--texto-medio)" fontSize={11} />
-              <YAxis
-                type="category"
-                dataKey="name"
-                width={120}
+              <XAxis
+                type="number"
                 stroke="var(--texto-medio)"
                 fontSize={11}
                 tick={{ fill: "var(--texto-claro)" }}
+                allowDecimals={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={220}
+                stroke="var(--texto-medio)"
+                fontSize={11}
+                tick={{ fill: "var(--texto-claro)" }}
+                tickFormatter={(v) => truncateLabel(String(v))}
               />
             </>
           ) : (
@@ -62,9 +80,15 @@ export default function BarChart({
                 tick={{ fill: "var(--texto-claro)" }}
                 angle={-45}
                 textAnchor="end"
-                height={80}
+                height={100}
+                interval={0}
               />
-              <YAxis stroke="var(--texto-medio)" fontSize={11} />
+              <YAxis
+                stroke="var(--texto-medio)"
+                fontSize={11}
+                tick={{ fill: "var(--texto-claro)" }}
+                width={50}
+              />
             </>
           )}
           <Tooltip
@@ -75,13 +99,21 @@ export default function BarChart({
               color: "var(--texto-claro)",
             }}
             labelStyle={{ color: "var(--texto-medio)" }}
+            formatter={(value: number, _name: string, props: { payload?: { nameFull?: string; name?: string } }) =>
+              [value.toLocaleString(), props?.payload?.nameFull ?? props?.payload?.name ?? ""]
+            }
           />
           <Bar
             dataKey="value"
             radius={[0, 4, 4, 0]}
             fill="var(--acento1)"
             maxBarSize={40}
-            label={{ position: "right", fill: "var(--texto-claro)", fontSize: 11 }}
+            label={{
+              position: horizontal ? "right" : "top",
+              fill: "var(--texto-claro)",
+              fontSize: 11,
+              offset: horizontal ? 8 : 4,
+            }}
           >
             {chartData.map((_, i) => (
               <Cell key={i} fill={colors[i % colors.length]} />

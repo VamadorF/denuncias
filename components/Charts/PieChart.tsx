@@ -31,7 +31,7 @@ export default function PieChart({
     <div className="chart-container" style={{ height }}>
       {title && <h4 className="chart-title">{title}</h4>}
       <ResponsiveContainer width="100%" height="100%">
-        <RechartsPieChart>
+        <RechartsPieChart margin={{ top: 16, right: 24, left: 24, bottom: 48 }}>
           <Pie
             data={chartData}
             cx="50%"

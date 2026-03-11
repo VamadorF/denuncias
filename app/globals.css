@@ -237,21 +237,22 @@ body {
 }
 
 .chart-section {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
   animation: fadeInUp 0.5s ease-out;
 }
 
 .section-title {
   font-size: 1.1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   color: var(--texto-claro);
 }
 
 .chart-container {
   background: var(--fondo-card);
   border-radius: 12px;
-  padding: 1rem;
+  padding: 1.25rem;
   border: 1px solid var(--borde);
+  min-height: 0;
 }
 
 .chart-title {
@@ -263,8 +264,8 @@ body {
 .charts-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 @media (max-width: 900px) {
