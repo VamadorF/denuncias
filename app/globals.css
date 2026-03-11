@@ -378,6 +378,176 @@ body {
   overflow-y: auto;
 }
 
+/* Comparador de establecimientos */
+.comparador-section .section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comparador-desc {
+  color: var(--texto-medio);
+  font-size: 0.9rem;
+  margin: -0.5rem 0 1rem 0;
+}
+
+.comparador-selector {
+  margin-bottom: 1.5rem;
+}
+
+.comparador-selector label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--texto-medio);
+  margin-bottom: 0.5rem;
+}
+
+.comparador-busqueda {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+  background: var(--fondo-card);
+  color: var(--texto-claro);
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+}
+
+.comparador-busqueda:focus {
+  outline: none;
+  border-color: var(--acento1);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+}
+
+.comparador-lista-opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.comparador-opcion {
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--borde);
+  background: var(--fondo-card);
+  color: var(--texto-claro);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.comparador-opcion:hover:not(.disabled) {
+  border-color: var(--acento1);
+  background: var(--fondo-card-hover);
+}
+
+.comparador-opcion.activo {
+  border-color: var(--acento1);
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--acento1);
+}
+
+.comparador-opcion.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.comparador-seleccionados {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comparador-seleccionados-label {
+  font-size: 0.85rem;
+  color: var(--texto-medio);
+}
+
+.comparador-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  background: rgba(0, 212, 255, 0.15);
+  border: 1px solid var(--acento1);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--texto-claro);
+}
+
+.comparador-chip-remove {
+  background: none;
+  border: none;
+  color: var(--acento1);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.comparador-chip-remove:hover {
+  opacity: 1;
+  color: var(--acento5);
+}
+
+.comparador-metricas {
+  margin-bottom: 2rem;
+}
+
+.comparador-metricas h4,
+.comparador-chart h4 {
+  font-size: 1rem;
+  color: var(--texto-medio);
+  margin-bottom: 1rem;
+}
+
+.comparador-tabla-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+}
+
+.comparador-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.comparador-tabla th,
+.comparador-tabla td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--borde);
+}
+
+.comparador-tabla th {
+  background: var(--fondo-card-hover);
+  color: var(--texto-medio);
+  font-weight: 600;
+}
+
+.comparador-tabla tbody tr:hover {
+  background: var(--fondo-card-hover);
+}
+
+.comparador-nombre {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comparador-chart {
+  margin-bottom: 2rem;
+}
+
 .loading {
   display: flex;
   align-items: center;

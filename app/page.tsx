@@ -17,6 +17,7 @@ import PieChart from "@/components/Charts/PieChart";
 import LineChart from "@/components/Charts/LineChart";
 import TopEstablecimientos from "@/components/TopEstablecimientos";
 import DetalleEstablecimiento from "@/components/DetalleEstablecimiento";
+import ComparadorEstablecimientos from "@/components/ComparadorEstablecimientos";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 function countBy(
@@ -317,6 +318,8 @@ export default function DashboardPage() {
         <TopEstablecimientos data={filtered} tipoChart={tipoDistribucion} />
 
         <DetalleEstablecimiento data={filtered} tipoChart={tipoDistribucion} />
+
+        <ComparadorEstablecimientos data={filtered} />
 
         <div className="expander" style={{ marginTop: "2rem" }}>
           <button
