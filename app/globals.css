@@ -1038,6 +1038,114 @@ body {
   margin-bottom: 2rem;
 }
 
+.comparador-chart-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.comparador-chart-header h4 {
+  margin: 0;
+}
+
+.comparador-orientacion-btns {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.comparador-orientacion-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid var(--borde);
+  background: var(--fondo);
+  color: var(--texto-medio);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comparador-orientacion-btn:hover {
+  border-color: var(--acento1);
+  color: var(--acento1);
+}
+
+.comparador-orientacion-btn.active {
+  border-color: var(--acento1);
+  background: rgba(0, 212, 255, 0.12);
+  color: var(--acento1);
+}
+
+@media (max-width: 600px) {
+  .comparador-orientacion-btn {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8rem;
+  }
+}
+
+.comparador-resumen-texto {
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--fondo-card);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  border-left: 4px solid var(--acento1);
+}
+
+.comparador-resumen-texto h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  margin: 0 0 0.75rem 0;
+  color: var(--texto-claro);
+}
+
+.comparador-resumen-texto p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--texto-medio);
+}
+
+.comparador-resumen-texto strong {
+  color: var(--acento1);
+}
+
+.comparador-expander {
+  margin-bottom: 1rem;
+}
+
+.comparador-expander-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--fondo-card);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  color: var(--acento1);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.comparador-expander-trigger:hover {
+  background: var(--fondo-card-hover);
+}
+
+.comparador-expander-content {
+  margin-top: 0.5rem;
+  padding: 1rem 0;
+}
+
 /* Botón Ir al Comparador en sidebar del dashboard */
 .comparador-sidebar-btn {
   display: flex;

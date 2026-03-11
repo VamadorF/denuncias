@@ -16,7 +16,7 @@ import {
 } from "recharts";
 import { COLORS } from "@/lib/constants";
 import { MESES } from "@/lib/constants";
-import { GitCompare } from "lucide-react";
+import { GitCompare, ChevronDown, ChevronUp, FileText, AlignHorizontalSpaceAround, AlignVerticalSpaceAround } from "lucide-react";
 import BarChart from "./Charts/BarChart";
 import PieChart from "./Charts/PieChart";
 
@@ -203,6 +203,30 @@ export default function ComparadorEstablecimientos({
   const dataKeyTemas = temasComparacion.length > 0 ? Object.keys(temasComparacion[0]).filter((k) => k !== "tema") : [];
   const dataKeyAmbitos = ambitosComparacion.length > 0 ? Object.keys(ambitosComparacion[0]).filter((k) => k !== "ambito") : [];
 
+  const [expandedTema, setExpandedTema] = useState(false);
+  const [expandedAmbito, setExpandedAmbito] = useState(false);
+  const [expandedEvolucion, setExpandedEvolucion] = useState(false);
+  const [orientacionBarra, setOrientacionBarra] = useState<"horizontal" | "vertical">("horizontal");
+
+  const resumenComparacion = useMemo((): { menor: string; mayor: string; totalMenor: number; totalMayor: number; diferencia: number; ratio: number; tipo: "iguales" | "significativo" | "similar" } | null => {
+    if (metricasComparacion.length < 2) return null;
+    const ordenados = [...metricasComparacion].sort((a, b) => a.total - b.total);
+    const menor = ordenados[0];
+    const mayor = ordenados[ordenados.length - 1];
+    const diferencia = mayor.total - menor.total;
+    const ratio = menor.total > 0 ? mayor.total / menor.total : 0;
+    const nombreMenor = menor.nombreFull.length > 50 ? menor.nombreFull.slice(0, 50) + "…" : menor.nombreFull;
+    const nombreMayor = mayor.nombreFull.length > 50 ? mayor.nombreFull.slice(0, 50) + "…" : mayor.nombreFull;
+
+    if (diferencia === 0) {
+      return { menor: nombreMenor, mayor: nombreMayor, totalMenor: menor.total, totalMayor: mayor.total, diferencia: 0, ratio: 1, tipo: "iguales" };
+    }
+    if (ratio >= 2) {
+      return { menor: nombreMenor, mayor: nombreMayor, totalMenor: menor.total, totalMayor: mayor.total, diferencia, ratio, tipo: "significativo" };
+    }
+    return { menor: nombreMenor, mayor: nombreMayor, totalMenor: menor.total, totalMayor: mayor.total, diferencia, ratio, tipo: "similar" };
+  }, [metricasComparacion]);
+
   return (
     <section className="chart-section comparador-section">
       <h3 className="section-title">
@@ -291,7 +315,31 @@ export default function ComparadorEstablecimientos({
 
           {/* Gráfico de total de denuncias por establecimiento */}
           <div className="comparador-chart comparador-total-chart">
-            <h4>Total de denuncias por establecimiento</h4>
+            <div className="comparador-chart-header">
+              <h4>Total de denuncias por establecimiento</h4>
+              {tipoDistribucion === "Barras" && (
+                <div className="comparador-orientacion-btns">
+                  <button
+                    type="button"
+                    className={`comparador-orientacion-btn ${orientacionBarra === "horizontal" ? "active" : ""}`}
+                    onClick={() => setOrientacionBarra("horizontal")}
+                    title="Barras horizontales"
+                  >
+                    <AlignHorizontalSpaceAround size={18} />
+                    Horizontal
+                  </button>
+                  <button
+                    type="button"
+                    className={`comparador-orientacion-btn ${orientacionBarra === "vertical" ? "active" : ""}`}
+                    onClick={() => setOrientacionBarra("vertical")}
+                    title="Barras verticales"
+                  >
+                    <AlignVerticalSpaceAround size={18} />
+                    Vertical
+                  </button>
+                </div>
+              )}
+            </div>
             {tipoDistribucion === "Circular" ? (
               <PieChart
                 data={metricasComparacion.map((m) => ({ name: m.nombreFull, value: m.total }))}
@@ -304,18 +352,49 @@ export default function ComparadorEstablecimientos({
                   name: m.nombreFull,
                   value: m.total,
                 }))}
-                horizontal
-                height={Math.max(200, seleccionados.length * 80)}
-                labelWidth={220}
-                labelMaxLength={40}
+                horizontal={orientacionBarra === "horizontal"}
+                height={orientacionBarra === "vertical" ? Math.max(300, 50 * seleccionados.length) : Math.max(200, seleccionados.length * 80)}
+                labelWidth={orientacionBarra === "horizontal" ? 220 : 120}
+                labelMaxLength={orientacionBarra === "horizontal" ? 40 : 25}
                 colors={COLORS.slice(0, seleccionados.length)}
               />
             )}
           </div>
 
+          {resumenComparacion && (
+            <div className="comparador-resumen-texto">
+              <h4>
+                <FileText size={18} />
+                Resumen de la comparación
+              </h4>
+              <p>
+                {resumenComparacion.tipo === "iguales" ? (
+                  <>Los {seleccionados.length} establecimientos presentan el mismo número de denuncias ({resumenComparacion.totalMenor.toLocaleString()}) en el período analizado.</>
+                ) : resumenComparacion.tipo === "significativo" ? (
+                  <>
+                    Con base en las denuncias registradas, <strong>{resumenComparacion.menor}</strong> presenta un menor número de denuncias ({resumenComparacion.totalMenor.toLocaleString()}) que <strong>{resumenComparacion.mayor}</strong> ({resumenComparacion.totalMayor.toLocaleString()}), con una diferencia de {resumenComparacion.diferencia.toLocaleString()} casos. Esto sugiere un entorno más favorable en el período analizado para el establecimiento con menos denuncias.
+                  </>
+                ) : (
+                  <>
+                    <strong>{resumenComparacion.menor}</strong> registra menos denuncias ({resumenComparacion.totalMenor.toLocaleString()}) que <strong>{resumenComparacion.mayor}</strong> ({resumenComparacion.totalMayor.toLocaleString()}). La diferencia de {resumenComparacion.diferencia.toLocaleString()} casos indica que ambos establecimientos presentan niveles relativamente similares en el período.
+                  </>
+                )}
+              </p>
+            </div>
+          )}
+
           {temasComparacion.length > 0 && (
-            <div className="comparador-chart">
-              <h4>Comparación por Tema</h4>
+            <div className="comparador-expander">
+              <button
+                type="button"
+                className="comparador-expander-trigger"
+                onClick={() => setExpandedTema((e) => !e)}
+              >
+                {expandedTema ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                Comparación por Tema
+              </button>
+              {expandedTema && (
+                <div className="comparador-expander-content">
               <div className="chart-container" style={{ height: 400 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <RechartsBarChart
@@ -362,12 +441,23 @@ export default function ComparadorEstablecimientos({
                   </RechartsBarChart>
                 </ResponsiveContainer>
               </div>
+                </div>
+              )}
             </div>
           )}
 
           {ambitosComparacion.length > 0 && (
-            <div className="comparador-chart">
-              <h4>Comparación por Ámbito</h4>
+            <div className="comparador-expander">
+              <button
+                type="button"
+                className="comparador-expander-trigger"
+                onClick={() => setExpandedAmbito((e) => !e)}
+              >
+                {expandedAmbito ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                Comparación por Ámbito
+              </button>
+              {expandedAmbito && (
+                <div className="comparador-expander-content">
               <div className="chart-container" style={{ height: 320 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <RechartsBarChart
@@ -414,11 +504,22 @@ export default function ComparadorEstablecimientos({
                   </RechartsBarChart>
                 </ResponsiveContainer>
               </div>
+                </div>
+              )}
             </div>
           )}
 
-          <div className="comparador-chart">
-            <h4>Evolución mensual</h4>
+          <div className="comparador-expander">
+            <button
+              type="button"
+              className="comparador-expander-trigger"
+              onClick={() => setExpandedEvolucion((e) => !e)}
+            >
+              {expandedEvolucion ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+              Evolución mensual
+            </button>
+            {expandedEvolucion && (
+              <div className="comparador-expander-content">
             {tipoEvolucion === "Barras" ? (
               <EvolucionBarrasChart data={evolucionComparacion} seleccionados={seleccionados} />
             ) : (
@@ -473,6 +574,8 @@ export default function ComparadorEstablecimientos({
                     ))}
                   </AreaChart>
                 </ResponsiveContainer>
+              </div>
+            )}
               </div>
             )}
           </div>
