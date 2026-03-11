@@ -18,6 +18,8 @@ import LineChart from "@/components/Charts/LineChart";
 import TopEstablecimientos from "@/components/TopEstablecimientos";
 import DetalleEstablecimiento from "@/components/DetalleEstablecimiento";
 import ComparadorEstablecimientos from "@/components/ComparadorEstablecimientos";
+import MobileNav from "@/components/MobileNav";
+import { useIsMobile } from "@/lib/useMediaQuery";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 function countBy(
@@ -44,6 +46,8 @@ export default function DashboardPage() {
   const [tipoDistribucion, setTipoDistribucion] = useState<"Barras" | "Circular">("Barras");
   const [tipoEvolucion, setTipoEvolucion] = useState<"Líneas" | "Barras">("Líneas");
   const [tablaExpanded, setTablaExpanded] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const añosDisponibles = index?.años ?? [];
 
@@ -211,25 +215,38 @@ export default function DashboardPage() {
     );
   }
 
+  const filtersProps = {
+    filtros,
+    onChange: setFiltros,
+    añosDisponibles,
+    regiones,
+    comunas,
+    ambitos,
+    temas,
+    subtemas,
+    estados,
+    meses,
+    trimestres,
+    tipoDistribucion,
+    tipoEvolucion,
+    onTipoDistribucion: setTipoDistribucion,
+    onTipoEvolucion: setTipoEvolucion,
+  };
+
   return (
-    <div className="dashboard-layout">
-      <Filters
-        filtros={filtros}
-        onChange={setFiltros}
-        añosDisponibles={añosDisponibles}
-        regiones={regiones}
-        comunas={comunas}
-        ambitos={ambitos}
-        temas={temas}
-        subtemas={subtemas}
-        estados={estados}
-        meses={meses}
-        trimestres={trimestres}
-        tipoDistribucion={tipoDistribucion}
-        tipoEvolucion={tipoEvolucion}
-        onTipoDistribucion={setTipoDistribucion}
-        onTipoEvolucion={setTipoEvolucion}
-      />
+    <div className={`dashboard-layout ${isMobile ? "mobile" : ""}`}>
+      {isMobile ? (
+        <MobileNav
+          filtersOpen={filtersOpen}
+          onFiltersToggle={() => setFiltersOpen((o) => !o)}
+          hasActiveFilters={hasFilters}
+          filtersContent={
+            <Filters {...filtersProps} inDrawer />
+          }
+        />
+      ) : (
+        <Filters {...filtersProps} />
+      )}
       <main className="main-content">
         <header className="main-header">
           <h1>Dashboard de Denuncias Educativas</h1>
@@ -239,15 +256,18 @@ export default function DashboardPage() {
           </p>
         </header>
 
-        <Metrics
-          data={filtered}
-          totalUnfiltered={dataInRange.length}
-          hasFilters={hasFilters}
-          filtros={filtros}
-        />
+        <section id="resumen">
+          <Metrics
+            data={filtered}
+            totalUnfiltered={dataInRange.length}
+            hasFilters={hasFilters}
+            filtros={filtros}
+          />
+        </section>
 
         <hr style={{ borderColor: "var(--borde)", margin: "2rem 0" }} />
 
+        <section id="graficos">
         <div className="charts-row">
           <div className="chart-section">
             <h3 className="section-title">{chart1Title}</h3>
@@ -255,7 +275,7 @@ export default function DashboardPage() {
               tipoDistribucion === "Circular" ? (
                 <PieChart data={chart1Data} height={400} />
               ) : (
-                <BarChart data={chart1Data} horizontal height={400} />
+                <BarChart data={chart1Data} horizontal height={400} labelWidth={300} />
               )
             ) : (
               <p className="info-message">No hay datos para mostrar con los filtros aplicados.</p>
@@ -308,19 +328,27 @@ export default function DashboardPage() {
             tipoDistribucion === "Circular" ? (
               <PieChart data={temaTopData} height={450} />
             ) : (
-              <BarChart data={temaTopData} horizontal height={450} />
+              <BarChart data={temaTopData} horizontal height={450} labelWidth={320} />
             )
           ) : (
             <p className="info-message">No hay datos.</p>
           )}
         </div>
 
+        </section>
+
+        <section id="establecimientos">
         <TopEstablecimientos data={filtered} tipoChart={tipoDistribucion} />
 
         <DetalleEstablecimiento data={filtered} tipoChart={tipoDistribucion} />
 
-        <ComparadorEstablecimientos data={filtered} />
+        </section>
 
+        <section id="comparador">
+        <ComparadorEstablecimientos data={filtered} />
+        </section>
+
+        <section id="tabla">
         <div className="expander" style={{ marginTop: "2rem" }}>
           <button
             type="button"
@@ -365,6 +393,7 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+        </section>
       </main>
     </div>
   );

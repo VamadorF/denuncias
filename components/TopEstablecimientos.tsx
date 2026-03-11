@@ -36,6 +36,8 @@ export default function TopEstablecimientos({ data, tipoChart }: TopEstablecimie
           data={chartData}
           horizontal
           height={550}
+          labelWidth={320}
+          labelMaxLength={70}
           colors={["#9D4EDD", "#FF6B35", "#FF3366", "#9D4EDD", "#FF6B35", "#FF3366"]}
         />
       )}

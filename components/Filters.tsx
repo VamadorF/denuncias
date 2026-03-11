@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 interface FiltersProps {
   filtros: Filtros;
   onChange: (f: Filtros) => void;
+  inDrawer?: boolean;
   añosDisponibles: number[];
   regiones: string[];
   comunas: string[];
@@ -25,6 +26,7 @@ interface FiltersProps {
 export default function Filters({
   filtros,
   onChange,
+  inDrawer = false,
   añosDisponibles,
   regiones,
   comunas,
@@ -43,13 +45,20 @@ export default function Filters({
     onChange({ ...filtros, ...partial });
   };
 
+  const Wrapper = inDrawer ? "div" : "aside";
+  const wrapperClass = inDrawer ? "filters-drawer-content" : "filters-sidebar";
+
   return (
-    <aside className="filters-sidebar">
-      <h2 className="filters-header">
-        <Search size={20} />
-        Filtros
-      </h2>
-      <hr className="filters-divider" />
+    <Wrapper className={wrapperClass}>
+      {!inDrawer && (
+        <>
+          <h2 className="filters-header">
+            <Search size={20} />
+            Filtros
+          </h2>
+          <hr className="filters-divider" />
+        </>
+      )}
 
       <div className="filter-group">
         <label>Rango de años</label>
@@ -281,6 +290,6 @@ export default function Filters({
 
       <hr className="filters-divider" />
       <p className="filters-caption">Datos: Denuncias - Superintendencia de Educación</p>
-    </aside>
+    </Wrapper>
   );
 }

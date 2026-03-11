@@ -12,15 +12,16 @@ import {
 } from "recharts";
 import { COLORS } from "@/lib/constants";
 
-const truncateLabel = (str: string, max = 45) =>
-  str.length > max ? str.slice(0, max) + "…" : str;
-
 interface BarChartProps {
   data: { name: string; value: number }[];
   horizontal?: boolean;
   height?: number;
   colors?: string[];
   title?: string;
+  /** Ancho del eje Y para etiquetas (horizontal) */
+  labelWidth?: number;
+  /** Máx. caracteres antes de truncar (0 = sin truncar) */
+  labelMaxLength?: number;
 }
 
 export default function BarChart({
@@ -29,7 +30,13 @@ export default function BarChart({
   height = 400,
   colors = COLORS,
   title,
+  labelWidth = 280,
+  labelMaxLength = 60,
 }: BarChartProps) {
+  const truncate = (str: string) =>
+    labelMaxLength > 0 && str.length > labelMaxLength
+      ? str.slice(0, labelMaxLength) + "…"
+      : str;
   if (!data || data.length === 0) return null;
 
   const chartData = data.map((d) => ({
@@ -47,9 +54,10 @@ export default function BarChart({
           layout={horizontal ? "vertical" : "horizontal"}
           margin={
             horizontal
-              ? { top: 16, right: 32, left: 8, bottom: 16 }
+              ? { top: 20, right: 40, left: 12, bottom: 20 }
               : { top: 24, right: 24, left: 16, bottom: 100 }
           }
+          barCategoryGap={horizontal ? 12 : undefined}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--borde)" opacity={0.5} />
           {horizontal ? (
@@ -64,11 +72,14 @@ export default function BarChart({
               <YAxis
                 type="category"
                 dataKey="name"
-                width={220}
+                width={labelWidth}
                 stroke="var(--texto-medio)"
                 fontSize={11}
-                tick={{ fill: "var(--texto-claro)" }}
-                tickFormatter={(v) => truncateLabel(String(v))}
+                tick={{
+                  fill: "var(--texto-claro)",
+                  style: { lineHeight: 1.5 },
+                }}
+                tickFormatter={(v) => truncate(String(v))}
               />
             </>
           ) : (
@@ -107,7 +118,7 @@ export default function BarChart({
             dataKey="value"
             radius={[0, 4, 4, 0]}
             fill="var(--acento1)"
-            maxBarSize={40}
+            maxBarSize={36}
             label={{
               position: horizontal ? "right" : "top",
               fill: "var(--texto-claro)",
