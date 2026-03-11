@@ -991,6 +991,107 @@ body {
   margin-bottom: 2rem;
 }
 
+.comparador-metricas-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.comparador-metricas-header h4 {
+  margin: 0;
+}
+
+.comparador-tipo-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comparador-tipo-resumen label {
+  font-size: 0.85rem;
+  color: var(--texto-medio);
+  margin: 0;
+}
+
+.comparador-tipo-resumen-btns {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.comparador-tipo-resumen-btn {
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--borde);
+  background: var(--fondo);
+  color: var(--texto-medio);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comparador-tipo-resumen-btn:hover {
+  border-color: var(--acento1);
+  color: var(--acento1);
+}
+
+.comparador-tipo-resumen-btn.active {
+  border-color: var(--acento1);
+  background: rgba(0, 212, 255, 0.12);
+  color: var(--acento1);
+}
+
+@media (max-width: 600px) {
+  .comparador-metricas-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .comparador-tipo-resumen {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .comparador-tipo-resumen-btns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .comparador-tipo-resumen-btn {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+}
+
+.comparador-metricas-desc {
+  font-size: 0.85rem;
+  color: var(--texto-medio);
+  margin: -0.5rem 0 0.75rem 0;
+}
+
+.comparador-fila-favorable td {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.comparador-nombre {
+  position: relative;
+}
+
+.comparador-badge-favorable {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--acento2);
+  background: rgba(16, 185, 129, 0.15);
+  border-radius: 4px;
+}
+
 .comparador-metricas h4,
 .comparador-chart h4 {
   font-size: 1rem;

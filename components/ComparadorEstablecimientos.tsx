@@ -207,25 +207,78 @@ export default function ComparadorEstablecimientos({
   const [expandedAmbito, setExpandedAmbito] = useState(false);
   const [expandedEvolucion, setExpandedEvolucion] = useState(false);
   const [orientacionBarra, setOrientacionBarra] = useState<"horizontal" | "vertical">("horizontal");
+  const [tipoResumen, setTipoResumen] = useState<"total" | "estado" | "ciberbullying">("total");
 
-  const resumenComparacion = useMemo((): { menor: string; mayor: string; totalMenor: number; totalMayor: number; diferencia: number; ratio: number; tipo: "iguales" | "significativo" | "similar" } | null => {
-    if (metricasComparacion.length < 2) return null;
-    const ordenados = [...metricasComparacion].sort((a, b) => a.total - b.total);
-    const menor = ordenados[0];
-    const mayor = ordenados[ordenados.length - 1];
-    const diferencia = mayor.total - menor.total;
-    const ratio = menor.total > 0 ? mayor.total / menor.total : 0;
-    const nombreMenor = menor.nombreFull.length > 50 ? menor.nombreFull.slice(0, 50) + "…" : menor.nombreFull;
-    const nombreMayor = mayor.nombreFull.length > 50 ? mayor.nombreFull.slice(0, 50) + "…" : mayor.nombreFull;
+  type ResumenData = {
+    favorable: string;
+    desfavorable: string;
+    valorFavorable: number;
+    valorDesfavorable: number;
+    diferencia: number;
+    tipo: "iguales" | "significativo" | "similar";
+    descripcion: string;
+  };
 
-    if (diferencia === 0) {
-      return { menor: nombreMenor, mayor: nombreMayor, totalMenor: menor.total, totalMayor: mayor.total, diferencia: 0, ratio: 1, tipo: "iguales" };
+  const { ordenados, resumenData } = useMemo(() => {
+    if (metricasComparacion.length < 2) {
+      return { ordenados: metricasComparacion, resumenData: null as ResumenData | null };
     }
-    if (ratio >= 2) {
-      return { menor: nombreMenor, mayor: nombreMayor, totalMenor: menor.total, totalMayor: mayor.total, diferencia, ratio, tipo: "significativo" };
+
+    let ordenados: typeof metricasComparacion;
+    let favorable: (typeof metricasComparacion)[0];
+    let desfavorable: (typeof metricasComparacion)[0];
+    let valorFavorable: number;
+    let valorDesfavorable: number;
+    let descripcion: string;
+
+    if (tipoResumen === "total") {
+      ordenados = [...metricasComparacion].sort((a, b) => a.total - b.total);
+      favorable = ordenados[0];
+      desfavorable = ordenados[ordenados.length - 1];
+      valorFavorable = favorable.total;
+      valorDesfavorable = desfavorable.total;
+      descripcion = "Ordenado de menor a mayor número de denuncias.";
+    } else if (tipoResumen === "estado") {
+      ordenados = [...metricasComparacion].sort((a, b) => {
+        const pctA = a.total > 0 ? (a.cerradas / a.total) * 100 : 0;
+        const pctB = b.total > 0 ? (b.cerradas / b.total) * 100 : 0;
+        return pctB - pctA;
+      });
+      favorable = ordenados[0];
+      desfavorable = ordenados[ordenados.length - 1];
+      valorFavorable = favorable.total > 0 ? Math.round((favorable.cerradas / favorable.total) * 100) : 0;
+      valorDesfavorable = desfavorable.total > 0 ? Math.round((desfavorable.cerradas / desfavorable.total) * 100) : 0;
+      descripcion = "Ordenado por mayor % de denuncias cerradas (resueltas).";
+    } else {
+      ordenados = [...metricasComparacion].sort((a, b) => a.ciber - b.ciber);
+      favorable = ordenados[0];
+      desfavorable = ordenados[ordenados.length - 1];
+      valorFavorable = favorable.ciber;
+      valorDesfavorable = desfavorable.ciber;
+      descripcion = "Ordenado por menor número de casos de ciberbullying.";
     }
-    return { menor: nombreMenor, mayor: nombreMayor, totalMenor: menor.total, totalMayor: mayor.total, diferencia, ratio, tipo: "similar" };
-  }, [metricasComparacion]);
+
+    const diferencia = valorDesfavorable - valorFavorable;
+    const ratio = valorFavorable > 0 ? valorDesfavorable / valorFavorable : 0;
+    const nombreFav = favorable.nombreFull.length > 50 ? favorable.nombreFull.slice(0, 50) + "…" : favorable.nombreFull;
+    const nombreDes = desfavorable.nombreFull.length > 50 ? desfavorable.nombreFull.slice(0, 50) + "…" : desfavorable.nombreFull;
+
+    let tipo: "iguales" | "significativo" | "similar" = "similar";
+    if (diferencia === 0) tipo = "iguales";
+    else if (ratio >= 2 || (tipoResumen === "estado" && diferencia >= 15)) tipo = "significativo";
+
+    const resumenData: ResumenData = {
+      favorable: nombreFav,
+      desfavorable: nombreDes,
+      valorFavorable,
+      valorDesfavorable,
+      diferencia,
+      tipo,
+      descripcion,
+    };
+
+    return { ordenados, resumenData };
+  }, [metricasComparacion, tipoResumen]);
 
   return (
     <section className="chart-section comparador-section">
@@ -286,7 +339,43 @@ export default function ComparadorEstablecimientos({
       {seleccionados.length >= 2 && (
         <>
           <div className="comparador-metricas">
-            <h4>Resumen comparativo</h4>
+            <div className="comparador-metricas-header">
+              <h4>Resumen comparativo</h4>
+              <div className="comparador-tipo-resumen">
+                <label>Tipo de resumen:</label>
+                <div className="comparador-tipo-resumen-btns">
+                  <button
+                    type="button"
+                    className={`comparador-tipo-resumen-btn ${tipoResumen === "total" ? "active" : ""}`}
+                    onClick={() => setTipoResumen("total")}
+                    title="Por total de denuncias"
+                  >
+                    Total
+                  </button>
+                  <button
+                    type="button"
+                    className={`comparador-tipo-resumen-btn ${tipoResumen === "estado" ? "active" : ""}`}
+                    onClick={() => setTipoResumen("estado")}
+                    title="Por % denuncias cerradas"
+                  >
+                    Estado
+                  </button>
+                  <button
+                    type="button"
+                    className={`comparador-tipo-resumen-btn ${tipoResumen === "ciberbullying" ? "active" : ""}`}
+                    onClick={() => setTipoResumen("ciberbullying")}
+                    title="Por ciberbullying"
+                  >
+                    Ciberbullying
+                  </button>
+                </div>
+              </div>
+            </div>
+            {resumenData && (
+              <p className="comparador-metricas-desc">
+                {resumenData.descripcion} El primero es el más favorable.
+              </p>
+            )}
             <div className="comparador-tabla-wrapper">
               <table className="comparador-tabla">
                 <thead>
@@ -299,15 +388,35 @@ export default function ComparadorEstablecimientos({
                   </tr>
                 </thead>
                 <tbody>
-                  {metricasComparacion.map((m) => (
-                    <tr key={m.nombreFull}>
-                      <td className="comparador-nombre">{m.nombreFull}</td>
-                      <td>{m.total.toLocaleString()}</td>
-                      <td>{m.cerradas.toLocaleString()}</td>
-                      <td>{m.enTramite.toLocaleString()}</td>
-                      <td>{m.ciber.toLocaleString()}</td>
-                    </tr>
-                  ))}
+                  {ordenados.map((m, i) => {
+                    const hayDiferencia = resumenData && ordenados.length > 1 && resumenData.diferencia > 0;
+                    const esFavorable = i === 0 && hayDiferencia;
+                    return (
+                      <tr key={m.nombreFull} className={esFavorable ? "comparador-fila-favorable" : ""}>
+                        <td className="comparador-nombre">
+                          {m.nombreFull}
+                          {esFavorable && (
+                            <span
+                              className="comparador-badge-favorable"
+                              title={
+                                tipoResumen === "total"
+                                  ? "Menor número de denuncias"
+                                  : tipoResumen === "estado"
+                                    ? "Mayor % denuncias cerradas"
+                                    : "Menor ciberbullying"
+                              }
+                            >
+                              más favorable
+                            </span>
+                          )}
+                        </td>
+                        <td>{m.total.toLocaleString()}</td>
+                        <td>{m.cerradas.toLocaleString()}</td>
+                        <td>{m.enTramite.toLocaleString()}</td>
+                        <td>{m.ciber.toLocaleString()}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -361,23 +470,49 @@ export default function ComparadorEstablecimientos({
             )}
           </div>
 
-          {resumenComparacion && (
+          {resumenData && (
             <div className="comparador-resumen-texto">
               <h4>
                 <FileText size={18} />
-                Resumen de la comparación
+                Resumen de la comparación ({tipoResumen === "total" ? "por total" : tipoResumen === "estado" ? "por estado" : "por ciberbullying"})
               </h4>
               <p>
-                {resumenComparacion.tipo === "iguales" ? (
-                  <>Los {seleccionados.length} establecimientos presentan el mismo número de denuncias ({resumenComparacion.totalMenor.toLocaleString()}) en el período analizado.</>
-                ) : resumenComparacion.tipo === "significativo" ? (
-                  <>
-                    Con base en las denuncias registradas, <strong>{resumenComparacion.menor}</strong> presenta un menor número de denuncias ({resumenComparacion.totalMenor.toLocaleString()}) que <strong>{resumenComparacion.mayor}</strong> ({resumenComparacion.totalMayor.toLocaleString()}), con una diferencia de {resumenComparacion.diferencia.toLocaleString()} casos. Esto sugiere un entorno más favorable en el período analizado para el establecimiento con menos denuncias.
-                  </>
+                {resumenData.tipo === "iguales" ? (
+                  tipoResumen === "total" ? (
+                    <>Los {seleccionados.length} establecimientos presentan el mismo número de denuncias ({resumenData.valorFavorable.toLocaleString()}) en el período analizado.</>
+                  ) : tipoResumen === "estado" ? (
+                    <>Los {seleccionados.length} establecimientos presentan un porcentaje similar de denuncias cerradas ({resumenData.valorFavorable}%) en el período analizado.</>
+                  ) : (
+                    <>Los {seleccionados.length} establecimientos presentan el mismo número de casos de ciberbullying ({resumenData.valorFavorable.toLocaleString()}) en el período analizado.</>
+                  )
+                ) : resumenData.tipo === "significativo" ? (
+                  tipoResumen === "total" ? (
+                    <>
+                      Con base en las denuncias registradas, <strong>{resumenData.favorable}</strong> presenta un menor número de denuncias ({resumenData.valorFavorable.toLocaleString()}) que <strong>{resumenData.desfavorable}</strong> ({resumenData.valorDesfavorable.toLocaleString()}), con una diferencia de {resumenData.diferencia.toLocaleString()} casos. Esto sugiere un entorno más favorable para <strong>{resumenData.favorable}</strong>.
+                    </>
+                  ) : tipoResumen === "estado" ? (
+                    <>
+                      <strong>{resumenData.favorable}</strong> tiene un mayor porcentaje de denuncias cerradas ({resumenData.valorFavorable}%) que <strong>{resumenData.desfavorable}</strong> ({resumenData.valorDesfavorable}%), con una diferencia de {resumenData.diferencia} puntos. Esto sugiere una mayor capacidad de resolución para <strong>{resumenData.favorable}</strong>.
+                    </>
+                  ) : (
+                    <>
+                      <strong>{resumenData.favorable}</strong> registra menos casos de ciberbullying ({resumenData.valorFavorable.toLocaleString()}) que <strong>{resumenData.desfavorable}</strong> ({resumenData.valorDesfavorable.toLocaleString()}), con una diferencia de {resumenData.diferencia.toLocaleString()} casos. Esto sugiere un entorno más favorable en este aspecto para <strong>{resumenData.favorable}</strong>.
+                    </>
+                  )
                 ) : (
-                  <>
-                    <strong>{resumenComparacion.menor}</strong> registra menos denuncias ({resumenComparacion.totalMenor.toLocaleString()}) que <strong>{resumenComparacion.mayor}</strong> ({resumenComparacion.totalMayor.toLocaleString()}). La diferencia de {resumenComparacion.diferencia.toLocaleString()} casos indica que ambos establecimientos presentan niveles relativamente similares en el período.
-                  </>
+                  tipoResumen === "total" ? (
+                    <>
+                      <strong>{resumenData.favorable}</strong> registra menos denuncias ({resumenData.valorFavorable.toLocaleString()}) que <strong>{resumenData.desfavorable}</strong> ({resumenData.valorDesfavorable.toLocaleString()}). La diferencia de {resumenData.diferencia.toLocaleString()} casos indica niveles relativamente similares; el más favorable es <strong>{resumenData.favorable}</strong>.
+                    </>
+                  ) : tipoResumen === "estado" ? (
+                    <>
+                      <strong>{resumenData.favorable}</strong> tiene mayor % de denuncias cerradas ({resumenData.valorFavorable}%) que <strong>{resumenData.desfavorable}</strong> ({resumenData.valorDesfavorable}%). Diferencia de {resumenData.diferencia} puntos; el más favorable es <strong>{resumenData.favorable}</strong>.
+                    </>
+                  ) : (
+                    <>
+                      <strong>{resumenData.favorable}</strong> tiene menos ciberbullying ({resumenData.valorFavorable.toLocaleString()}) que <strong>{resumenData.desfavorable}</strong> ({resumenData.valorDesfavorable.toLocaleString()}). Diferencia de {resumenData.diferencia.toLocaleString()} casos; el más favorable es <strong>{resumenData.favorable}</strong>.
+                    </>
+                  )
                 )}
               </p>
             </div>
