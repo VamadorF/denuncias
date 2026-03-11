@@ -260,6 +260,9 @@ export default function DashboardPage() {
             Sistema de Superintendencia de Educación - Visualización y análisis
             de denuncias (múltiples años)
           </p>
+          <Link href="/comparador?para=antonia" className="para-antonia-btn">
+            Para Antonia
+          </Link>
         </header>
 
         <section id="resumen">

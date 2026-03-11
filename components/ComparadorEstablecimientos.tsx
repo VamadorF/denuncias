@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Denuncia } from "@/lib/data";
 import {
   BarChart as RechartsBarChart,
@@ -16,7 +16,7 @@ import {
 } from "recharts";
 import { COLORS } from "@/lib/constants";
 import { MESES } from "@/lib/constants";
-import { GitCompare, ChevronDown, ChevronUp, FileText, AlignHorizontalSpaceAround, AlignVerticalSpaceAround } from "lucide-react";
+import { GitCompare, ChevronDown, ChevronUp, FileText, AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Heart } from "lucide-react";
 import BarChart from "./Charts/BarChart";
 import PieChart from "./Charts/PieChart";
 
@@ -78,6 +78,8 @@ interface ComparadorEstablecimientosProps {
   data: Denuncia[];
   tipoDistribucion?: "Barras" | "Circular";
   tipoEvolucion?: "Líneas" | "Barras";
+  initialSeleccionados?: string[];
+  paraAntonia?: boolean;
 }
 
 function countByKey(data: Denuncia[], key: keyof Denuncia): Record<string, number> {
@@ -94,9 +96,24 @@ export default function ComparadorEstablecimientos({
   data,
   tipoDistribucion = "Barras",
   tipoEvolucion = "Líneas",
+  initialSeleccionados,
+  paraAntonia = false,
 }: ComparadorEstablecimientosProps) {
   const [seleccionados, setSeleccionados] = useState<string[]>([]);
   const [busqueda, setBusqueda] = useState("");
+
+  const appliedInitial = useRef(false);
+  useEffect(() => {
+    if (initialSeleccionados?.length && data.length > 0 && !appliedInitial.current) {
+      const existentes = initialSeleccionados.filter((n) =>
+        data.some((d) => d.EE_NOMBRE?.trim() === n)
+      );
+      if (existentes.length > 0) {
+        setSeleccionados(existentes);
+        appliedInitial.current = true;
+      }
+    }
+  }, [initialSeleccionados, data]);
 
   const toggleEstablecimiento = useCallback((nombre: string) => {
     setSeleccionados((prev) => {
@@ -335,6 +352,21 @@ export default function ComparadorEstablecimientos({
           </div>
         )}
       </div>
+
+      {paraAntonia && seleccionados.length >= 2 && (
+        <div className="para-antonia-banner">
+          <h4>
+            <Heart size={22} />
+            Para Antonia
+          </h4>
+          <p>
+            Este estudio compara el <strong>Liceo Comercial Instituto Superior de Comercio de Chile (ex A99)</strong> con el <strong>Colegio Santa Rosa</strong>, utilizando datos oficiales de denuncias ante la Superintendencia de Educación.
+          </p>
+          <p>
+            <strong>¿Por qué elegiríamos el Liceo Comercial en este estudio?</strong> Por tres razones principales basadas en los datos: (1) <strong>Menor número total de denuncias</strong> — indica un entorno con menos conflictos reportados; (2) <strong>Menor incidencia de ciberbullying</strong> — un aspecto especialmente relevante para la convivencia escolar; (3) <strong>Mayor proporción de denuncias cerradas</strong> — sugiere una mejor capacidad de resolución. Explora los gráficos y resúmenes a continuación para ver los detalles.
+          </p>
+        </div>
+      )}
 
       {seleccionados.length >= 2 && (
         <>

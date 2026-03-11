@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   loadIndex,
   loadDenuncias,
@@ -17,7 +18,15 @@ import MobileNav from "@/components/MobileNav";
 import { useIsMobile } from "@/lib/useMediaQuery";
 import { GitCompare, ArrowLeft } from "lucide-react";
 
-export default function ComparadorPage() {
+const ESTABLECIMIENTOS_ANTONIA = [
+  "LICEO COMERCIAL INSTITUTO SUPERIOR DE COMERCIO DE CHILE (EX A99)",
+  "COLEGIO SANTA ROSA",
+];
+
+function ComparadorPageContent() {
+  const searchParams = useSearchParams();
+  const paraAntonia = searchParams.get("para") === "antonia";
+
   const [index, setIndex] = useState<{ años: number[] } | null>(null);
   const [allData, setAllData] = useState<Denuncia[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,8 +220,18 @@ export default function ComparadorPage() {
           data={filtered}
           tipoDistribucion={tipoDistribucion}
           tipoEvolucion={tipoEvolucion}
+          initialSeleccionados={paraAntonia ? ESTABLECIMIENTOS_ANTONIA : undefined}
+          paraAntonia={paraAntonia}
         />
       </main>
     </div>
+  );
+}
+
+export default function ComparadorPage() {
+  return (
+    <Suspense fallback={<div className="loading">Cargando...</div>}>
+      <ComparadorPageContent />
+    </Suspense>
   );
 }

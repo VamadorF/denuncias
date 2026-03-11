@@ -65,6 +65,36 @@ body {
   color: var(--texto-medio);
 }
 
+.para-antonia-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.para-antonia-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.45);
+}
+
+@media (max-width: 600px) {
+  .para-antonia-btn {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    font-size: 1rem;
+  }
+}
+
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
@@ -1216,6 +1246,53 @@ body {
 
 .comparador-resumen-texto strong {
   color: var(--acento1);
+}
+
+.para-antonia-banner {
+  margin-bottom: 2rem;
+  padding: 1.5rem 1.75rem;
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%);
+  border: 1px solid rgba(236, 72, 153, 0.3);
+  border-radius: 12px;
+  border-left: 4px solid #ec4899;
+}
+
+.para-antonia-banner h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.15rem;
+  margin: 0 0 1rem 0;
+  color: #ec4899;
+}
+
+.para-antonia-banner p {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--texto-medio);
+}
+
+.para-antonia-banner p:last-child {
+  margin-bottom: 0;
+}
+
+.para-antonia-banner strong {
+  color: var(--texto-claro);
+}
+
+@media (max-width: 600px) {
+  .para-antonia-banner {
+    padding: 1.25rem 1rem;
+  }
+
+  .para-antonia-banner h4 {
+    font-size: 1rem;
+  }
+
+  .para-antonia-banner p {
+    font-size: 0.9rem;
+  }
 }
 
 .comparador-expander {
