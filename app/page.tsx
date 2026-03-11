@@ -19,7 +19,9 @@ import LineChart from "@/components/Charts/LineChart";
 import TopEstablecimientos from "@/components/TopEstablecimientos";
 import DetalleEstablecimiento from "@/components/DetalleEstablecimiento";
 import MobileNav from "@/components/MobileNav";
+import ChartTypeSelector from "@/components/ChartTypeSelector";
 import { useIsMobile } from "@/lib/useMediaQuery";
+import { getColorForCategory } from "@/lib/constants";
 import { ChevronDown, ChevronUp, GitCompare } from "lucide-react";
 
 function countBy(
@@ -272,14 +274,30 @@ export default function DashboardPage() {
         <hr style={{ borderColor: "var(--borde)", margin: "2rem 0" }} />
 
         <section id="graficos">
+        <ChartTypeSelector
+          tipoDistribucion={tipoDistribucion}
+          tipoEvolucion={tipoEvolucion}
+          onTipoDistribucion={setTipoDistribucion}
+          onTipoEvolucion={setTipoEvolucion}
+        />
         <div className="charts-row">
           <div className="chart-section">
             <h3 className="section-title">{chart1Title}</h3>
             {chart1Data.length > 0 ? (
               tipoDistribucion === "Circular" ? (
-                <PieChart data={chart1Data} height={400} />
+                <PieChart
+                  data={chart1Data}
+                  height={400}
+                  colors={chart1Data.map((d, i) => getColorForCategory(d.name, i))}
+                />
               ) : (
-                <BarChart data={chart1Data} horizontal height={400} labelWidth={300} />
+                <BarChart
+                  data={chart1Data}
+                  horizontal
+                  height={400}
+                  labelWidth={300}
+                  colors={chart1Data.map((d, i) => getColorForCategory(d.name, i))}
+                />
               )
             ) : (
               <p className="info-message">No hay datos para mostrar con los filtros aplicados.</p>
@@ -289,9 +307,18 @@ export default function DashboardPage() {
             <h3 className="section-title">Denuncias por Estado</h3>
             {estadoData.length > 0 ? (
               tipoDistribucion === "Circular" ? (
-                <PieChart data={estadoData} height={400} />
+                <PieChart
+                  data={estadoData}
+                  height={400}
+                  colors={estadoData.map((d, i) => getColorForCategory(d.name, i))}
+                />
               ) : (
-                <BarChart data={estadoData} horizontal height={400} />
+                <BarChart
+                  data={estadoData}
+                  horizontal
+                  height={400}
+                  colors={estadoData.map((d, i) => getColorForCategory(d.name, i))}
+                />
               )
             ) : (
               <p className="info-message">No hay datos de estado para mostrar.</p>
@@ -304,9 +331,18 @@ export default function DashboardPage() {
             <h3 className="section-title">Denuncias por Ámbito</h3>
             {ambitoData.length > 0 ? (
               tipoDistribucion === "Circular" ? (
-                <PieChart data={ambitoData} height={380} />
+                <PieChart
+                  data={ambitoData}
+                  height={380}
+                  colors={ambitoData.map((d, i) => getColorForCategory(d.name, i))}
+                />
               ) : (
-                <BarChart data={ambitoData} horizontal={false} height={380} />
+                <BarChart
+                  data={ambitoData}
+                  horizontal={false}
+                  height={380}
+                  colors={ambitoData.map((d, i) => getColorForCategory(d.name, i))}
+                />
               )
             ) : (
               <p className="info-message">No hay datos de ámbito.</p>
@@ -330,9 +366,19 @@ export default function DashboardPage() {
           <h3 className="section-title">Top 10 Temas de Denuncia</h3>
           {temaTopData.length > 0 ? (
             tipoDistribucion === "Circular" ? (
-              <PieChart data={temaTopData} height={450} />
+              <PieChart
+                data={temaTopData}
+                height={450}
+                colors={temaTopData.map((d, i) => getColorForCategory(d.name, i))}
+              />
             ) : (
-              <BarChart data={temaTopData} horizontal height={450} labelWidth={320} />
+              <BarChart
+                data={temaTopData}
+                horizontal
+                height={450}
+                labelWidth={320}
+                colors={temaTopData.map((d, i) => getColorForCategory(d.name, i))}
+              />
             )
           ) : (
             <p className="info-message">No hay datos.</p>

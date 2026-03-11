@@ -54,15 +54,39 @@ export const PALETTE = {
   borde: "#2d2d4a",
 };
 
+/** Paleta principal: colores serios, vívidos y con buen contraste sobre fondo oscuro */
 export const COLORS = [
-  "#00D4FF",
-  "#00FF88",
-  "#FF6B35",
-  "#FFD93D",
-  "#FF3366",
-  "#9D4EDD",
-  "#00B4D8",
-  "#2EC4B6",
-  "#FF9F1C",
-  "#E040FB",
+  "#0EA5E9", // sky-500
+  "#14B8A6", // teal-500
+  "#6366F1", // indigo-500
+  "#8B5CF6", // violet-500
+  "#EC4899", // pink-500
+  "#F59E0B", // amber-500
+  "#10B981", // emerald-500
+  "#3B82F6", // blue-500
+  "#06B6D4", // cyan-500
+  "#A855F7", // purple-500
 ];
+
+/** Colores semánticos por estado de denuncia */
+export const ESTADO_COLORS: Record<string, string> = {
+  Cerrado: "#10B981",      // emerald - resuelto
+  "En trámite": "#F59E0B", // amber - en proceso
+  "En seguimiento": "#3B82F6", // blue - seguimiento
+};
+
+/** Colores semánticos por tipo de problema (ámbito/tema común) */
+export const TEMA_COLORS: Record<string, string> = {
+  "Maltrato entre pares": "#EC4899",
+  "Maltrato de adultos": "#F59E0B",
+  "Ciberbullying": "#8B5CF6",
+  "Discriminación": "#6366F1",
+  "Proceso educativo": "#14B8A6",
+  "Infraestructura": "#06B6D4",
+  "Otros": "#64748B",
+};
+
+/** Obtener color por categoría (estado, tema, etc.) o usar índice en COLORS */
+export function getColorForCategory(category: string, index: number): string {
+  return ESTADO_COLORS[category] ?? TEMA_COLORS[category] ?? COLORS[index % COLORS.length];
+}

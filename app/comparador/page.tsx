@@ -11,6 +11,7 @@ import {
   Filtros,
 } from "@/lib/data";
 import Filters from "@/components/Filters";
+import ChartTypeSelector from "@/components/ChartTypeSelector";
 import ComparadorEstablecimientos from "@/components/ComparadorEstablecimientos";
 import MobileNav from "@/components/MobileNav";
 import { useIsMobile } from "@/lib/useMediaQuery";
@@ -199,7 +200,18 @@ export default function ComparadorPage() {
           </p>
         </header>
 
-        <ComparadorEstablecimientos data={filtered} />
+        <ChartTypeSelector
+          tipoDistribucion={tipoDistribucion}
+          tipoEvolucion={tipoEvolucion}
+          onTipoDistribucion={setTipoDistribucion}
+          onTipoEvolucion={setTipoEvolucion}
+        />
+
+        <ComparadorEstablecimientos
+          data={filtered}
+          tipoDistribucion={tipoDistribucion}
+          tipoEvolucion={tipoEvolucion}
+        />
       </main>
     </div>
   );

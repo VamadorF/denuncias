@@ -147,7 +147,7 @@ export default function MobileNav({
           className="mobile-fab-filters"
           onClick={onFiltersToggle}
           aria-label="Abrir filtros"
-          title="Filtros"
+          title="Abrir filtros"
         >
           <SlidersHorizontal size={24} />
         </button>

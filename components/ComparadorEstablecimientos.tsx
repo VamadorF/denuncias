@@ -18,11 +18,66 @@ import { COLORS } from "@/lib/constants";
 import { MESES } from "@/lib/constants";
 import { GitCompare } from "lucide-react";
 import BarChart from "./Charts/BarChart";
+import PieChart from "./Charts/PieChart";
 
 const MAX_ESTABLECIMIENTOS = 5;
 
+/** Recharts Bar para evolución mensual en modo barras */
+function EvolucionBarrasChart({
+  data,
+  seleccionados,
+}: {
+  data: Record<string, string | number>[];
+  seleccionados: string[];
+}) {
+  return (
+    <div className="chart-container" style={{ height: 320 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RechartsBarChart data={data} margin={{ top: 16, right: 24, left: 16, bottom: 80 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--borde)" opacity={0.5} />
+          <XAxis
+            dataKey="mes"
+            stroke="var(--texto-medio)"
+            fontSize={11}
+            tick={{ fill: "var(--texto-claro)" }}
+          />
+          <YAxis stroke="var(--texto-medio)" fontSize={11} />
+          <Tooltip
+            contentStyle={{
+              background: "var(--fondo-card)",
+              border: "1px solid var(--borde)",
+              borderRadius: "8px",
+              color: "var(--texto-claro)",
+            }}
+          />
+          <Legend
+            wrapperStyle={{ paddingTop: 12 }}
+            formatter={(value: string) => (
+              <span style={{ color: "var(--texto-claro)", fontSize: 11 }}>
+                {value.length > 40 ? value.slice(0, 40) + "…" : value}
+              </span>
+            )}
+          />
+          {seleccionados.map((nombre, i) => (
+            <Bar
+              key={nombre}
+              dataKey={nombre}
+              name={nombre}
+              fill={COLORS[i % COLORS.length]}
+              radius={[4, 4, 0, 0]}
+              maxBarSize={36}
+            />
+          ))}
+        </RechartsBarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 interface ComparadorEstablecimientosProps {
   data: Denuncia[];
+  tipoDistribucion?: "Barras" | "Circular";
+  tipoEvolucion?: "Líneas" | "Barras";
 }
 
 function countByKey(data: Denuncia[], key: keyof Denuncia): Record<string, number> {
@@ -35,7 +90,11 @@ function countByKey(data: Denuncia[], key: keyof Denuncia): Record<string, numbe
   return out;
 }
 
-export default function ComparadorEstablecimientos({ data }: ComparadorEstablecimientosProps) {
+export default function ComparadorEstablecimientos({
+  data,
+  tipoDistribucion = "Barras",
+  tipoEvolucion = "Líneas",
+}: ComparadorEstablecimientosProps) {
   const [seleccionados, setSeleccionados] = useState<string[]>([]);
   const [busqueda, setBusqueda] = useState("");
 
@@ -233,17 +292,25 @@ export default function ComparadorEstablecimientos({ data }: ComparadorEstableci
           {/* Gráfico de total de denuncias por establecimiento */}
           <div className="comparador-chart comparador-total-chart">
             <h4>Total de denuncias por establecimiento</h4>
-            <BarChart
-              data={metricasComparacion.map((m) => ({
-                name: m.nombreFull,
-                value: m.total,
-              }))}
-              horizontal
-              height={Math.max(200, seleccionados.length * 80)}
-              labelWidth={220}
-              labelMaxLength={40}
-              colors={COLORS.slice(0, seleccionados.length)}
-            />
+            {tipoDistribucion === "Circular" ? (
+              <PieChart
+                data={metricasComparacion.map((m) => ({ name: m.nombreFull, value: m.total }))}
+                height={Math.max(280, seleccionados.length * 90)}
+                colors={COLORS.slice(0, seleccionados.length)}
+              />
+            ) : (
+              <BarChart
+                data={metricasComparacion.map((m) => ({
+                  name: m.nombreFull,
+                  value: m.total,
+                }))}
+                horizontal
+                height={Math.max(200, seleccionados.length * 80)}
+                labelWidth={220}
+                labelMaxLength={40}
+                colors={COLORS.slice(0, seleccionados.length)}
+              />
+            )}
           </div>
 
           {temasComparacion.length > 0 && (
@@ -352,58 +419,62 @@ export default function ComparadorEstablecimientos({ data }: ComparadorEstableci
 
           <div className="comparador-chart">
             <h4>Evolución mensual</h4>
-            <div className="chart-container" style={{ height: 320 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={evolucionComparacion}
-                  margin={{ top: 16, right: 24, left: 16, bottom: 24 }}
-                >
-                  <defs>
-                    {seleccionados.map((_, i) => (
-                      <linearGradient key={i} id={`evolGrad${i}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={COLORS[i % COLORS.length]} stopOpacity={0.3} />
-                        <stop offset="100%" stopColor={COLORS[i % COLORS.length]} stopOpacity={0} />
-                      </linearGradient>
-                    ))}
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--borde)" opacity={0.5} />
-                  <XAxis
-                    dataKey="mes"
-                    stroke="var(--texto-medio)"
-                    fontSize={11}
-                    tick={{ fill: "var(--texto-claro)" }}
-                  />
-                  <YAxis stroke="var(--texto-medio)" fontSize={11} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "var(--fondo-card)",
-                      border: "1px solid var(--borde)",
-                      borderRadius: "8px",
-                      color: "var(--texto-claro)",
-                    }}
-                  />
-                  <Legend
-                    wrapperStyle={{ paddingTop: 12 }}
-                    formatter={(value) => (
-                      <span style={{ color: "var(--texto-claro)", fontSize: 11 }}>
-                        {value.length > 40 ? value.slice(0, 40) + "…" : value}
-                      </span>
-                    )}
-                  />
-                  {seleccionados.map((nombre, i) => (
-                    <Area
-                      key={nombre}
-                      type="monotone"
-                      dataKey={nombre}
-                      name={nombre}
-                      stroke={COLORS[i % COLORS.length]}
-                      strokeWidth={2}
-                      fill={`url(#evolGrad${i})`}
+            {tipoEvolucion === "Barras" ? (
+              <EvolucionBarrasChart data={evolucionComparacion} seleccionados={seleccionados} />
+            ) : (
+              <div className="chart-container" style={{ height: 320 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={evolucionComparacion}
+                    margin={{ top: 16, right: 24, left: 16, bottom: 24 }}
+                  >
+                    <defs>
+                      {seleccionados.map((_, i) => (
+                        <linearGradient key={i} id={`evolGrad${i}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={COLORS[i % COLORS.length]} stopOpacity={0.3} />
+                          <stop offset="100%" stopColor={COLORS[i % COLORS.length]} stopOpacity={0} />
+                        </linearGradient>
+                      ))}
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--borde)" opacity={0.5} />
+                    <XAxis
+                      dataKey="mes"
+                      stroke="var(--texto-medio)"
+                      fontSize={11}
+                      tick={{ fill: "var(--texto-claro)" }}
                     />
-                  ))}
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+                    <YAxis stroke="var(--texto-medio)" fontSize={11} />
+                    <Tooltip
+                      contentStyle={{
+                        background: "var(--fondo-card)",
+                        border: "1px solid var(--borde)",
+                        borderRadius: "8px",
+                        color: "var(--texto-claro)",
+                      }}
+                    />
+                    <Legend
+                      wrapperStyle={{ paddingTop: 12 }}
+                      formatter={(value) => (
+                        <span style={{ color: "var(--texto-claro)", fontSize: 11 }}>
+                          {value.length > 40 ? value.slice(0, 40) + "…" : value}
+                        </span>
+                      )}
+                    />
+                    {seleccionados.map((nombre, i) => (
+                      <Area
+                        key={nombre}
+                        type="monotone"
+                        dataKey={nombre}
+                        name={nombre}
+                        stroke={COLORS[i % COLORS.length]}
+                        strokeWidth={2}
+                        fill={`url(#evolGrad${i})`}
+                      />
+                    ))}
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
         </>
       )}

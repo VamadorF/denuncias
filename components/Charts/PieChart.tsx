@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { COLORS } from "@/lib/constants";
+import { useIsMobile } from "@/lib/useMediaQuery";
 
 interface PieChartProps {
   data: { name: string; value: number }[];
@@ -23,21 +24,26 @@ export default function PieChart({
   colors = COLORS,
   title,
 }: PieChartProps) {
+  const isMobile = useIsMobile();
   if (!data || data.length === 0) return null;
 
   const chartData = data.map((d) => ({ name: d.name, value: d.value }));
 
   return (
-    <div className="chart-container" style={{ height }}>
+    <div className={`chart-container ${isMobile ? "chart-mobile" : ""}`} style={{ height }}>
       {title && <h4 className="chart-title">{title}</h4>}
       <ResponsiveContainer width="100%" height="100%">
-        <RechartsPieChart margin={{ top: 16, right: 24, left: 24, bottom: 48 }}>
+        <RechartsPieChart
+          margin={
+            isMobile ? { top: 12, right: 16, left: 16, bottom: 56 } : { top: 16, right: 24, left: 24, bottom: 48 }
+          }
+        >
           <Pie
             data={chartData}
             cx="50%"
             cy="50%"
-            innerRadius="50%"
-            outerRadius="80%"
+            innerRadius={isMobile ? "45%" : "50%"}
+            outerRadius={isMobile ? "75%" : "80%"}
             paddingAngle={2}
             dataKey="value"
             label={({ name, percent }) =>
@@ -55,6 +61,7 @@ export default function PieChart({
               border: "1px solid var(--borde)",
               borderRadius: "8px",
               color: "var(--texto-claro)",
+              fontSize: isMobile ? 14 : 12,
             }}
             formatter={(value: number) => [value.toLocaleString(), "Cantidad"]}
           />
@@ -62,9 +69,9 @@ export default function PieChart({
             layout="horizontal"
             align="center"
             verticalAlign="bottom"
-            wrapperStyle={{ paddingTop: 16 }}
+            wrapperStyle={{ paddingTop: isMobile ? 12 : 16 }}
             formatter={(value) => (
-              <span style={{ color: "var(--texto-claro)" }}>{value}</span>
+              <span style={{ color: "var(--texto-claro)", fontSize: isMobile ? 12 : 11 }}>{value}</span>
             )}
           />
         </RechartsPieChart>
