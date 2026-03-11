@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef, useEffect, useCallback } from "react";
 import { X, SlidersHorizontal, BarChart3, Building2, GitCompare, Table2, Home, ArrowLeft } from "lucide-react";
 
 interface MobileNavProps {
@@ -21,6 +22,8 @@ const SECTIONS: { id: string; label: string; icon: typeof Home; href?: string }[
   { id: "tabla", label: "Tabla", icon: Table2 },
 ];
 
+const SWIPE_THRESHOLD = 60;
+
 export default function MobileNav({
   filtersOpen,
   onFiltersToggle,
@@ -29,10 +32,62 @@ export default function MobileNav({
   filtersContent,
   isComparadorPage = false,
 }: MobileNavProps) {
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const drawerTouchStart = useRef<{ x: number; y: number } | null>(null);
+
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  const handleTouchStart = useCallback(
+    (e: TouchEvent) => {
+      if (filtersOpen) return;
+      const t = e.touches[0];
+      if (t.clientX < 40) {
+        touchStart.current = { x: t.clientX, y: t.clientY };
+      }
+    },
+    [filtersOpen]
+  );
+
+  const handleTouchEnd = useCallback(
+    (e: TouchEvent) => {
+      if (!touchStart.current) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStart.current.x;
+      const dy = t.clientY - touchStart.current.y;
+      if (dx > SWIPE_THRESHOLD && Math.abs(dy) < SWIPE_THRESHOLD) {
+        onFiltersToggle();
+      }
+      touchStart.current = null;
+    },
+    [onFiltersToggle]
+  );
+
+  const handleDrawerTouchStart = useCallback((e: React.TouchEvent) => {
+    drawerTouchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, []);
+
+  const handleDrawerTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (!drawerTouchStart.current || !filtersOpen) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - drawerTouchStart.current.x;
+      if (dx < -SWIPE_THRESHOLD) onFiltersToggle();
+      drawerTouchStart.current = null;
+    },
+    [filtersOpen, onFiltersToggle]
+  );
+
+  useEffect(() => {
+    document.addEventListener("touchstart", handleTouchStart, { passive: true });
+    document.addEventListener("touchend", handleTouchEnd, { passive: true });
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [handleTouchStart, handleTouchEnd]);
 
   return (
     <>
@@ -48,12 +103,13 @@ export default function MobileNav({
           )}
           <button
             type="button"
-            className={`mobile-menu-btn ${hasActiveFilters || hasComparadorSelection ? "has-filters" : ""}`}
+            className={`mobile-filters-btn ${hasActiveFilters || hasComparadorSelection ? "has-filters" : ""}`}
             onClick={onFiltersToggle}
             aria-label={filtersOpen ? "Cerrar filtros" : "Abrir filtros"}
           >
             {filtersOpen ? <X size={24} /> : <SlidersHorizontal size={22} />}
-            {hasActiveFilters && <span className="mobile-filters-badge" />}
+            <span className="mobile-filters-btn-label">{filtersOpen ? "Cerrar" : "Filtros"}</span>
+            {hasActiveFilters && !filtersOpen && <span className="mobile-filters-badge" />}
           </button>
         </div>
       </header>
@@ -64,7 +120,12 @@ export default function MobileNav({
         aria-hidden={!filtersOpen}
       />
 
-      <aside className={`mobile-filters-drawer ${filtersOpen ? "open" : ""}`}>
+      <aside
+        className={`mobile-filters-drawer ${filtersOpen ? "open" : ""}`}
+        onTouchStart={handleDrawerTouchStart}
+        onTouchEnd={handleDrawerTouchEnd}
+      >
+        <div className="mobile-drawer-swipe-handle" aria-hidden />
         <div className="mobile-drawer-header">
           <h2>{isComparadorPage ? "Filtros" : "Filtros y Comparador"}</h2>
           <button
@@ -76,8 +137,21 @@ export default function MobileNav({
             <X size={24} />
           </button>
         </div>
+        <p className="mobile-drawer-swipe-hint">Desliza desde el borde izquierdo para abrir</p>
         <div className="mobile-drawer-body">{filtersContent}</div>
       </aside>
+
+      {!isComparadorPage && (
+        <button
+          type="button"
+          className="mobile-fab-filters"
+          onClick={onFiltersToggle}
+          aria-label="Abrir filtros"
+          title="Filtros"
+        >
+          <SlidersHorizontal size={24} />
+        </button>
+      )}
 
       {!isComparadorPage && (
         <nav className="mobile-bottom-nav">

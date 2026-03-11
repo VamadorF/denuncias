@@ -273,6 +273,15 @@ body {
   overflow: visible;
 }
 
+.chart-container.chart-mobile {
+  padding: 1rem;
+  touch-action: pan-y;
+}
+
+.chart-container.chart-mobile .recharts-bar-rectangle {
+  stroke-width: 0;
+}
+
 .chart-title {
   font-size: 0.95rem;
   margin: 0 0 0.5rem 0;
@@ -434,12 +443,14 @@ body {
   color: var(--acento2);
 }
 
-.mobile-menu-btn {
+.mobile-filters-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
+  gap: 0.4rem;
+  min-width: 44px;
   height: 44px;
+  padding: 0 0.75rem;
   border-radius: 10px;
   border: 1px solid var(--borde);
   background: var(--fondo-card);
@@ -449,13 +460,24 @@ body {
   position: relative;
 }
 
-.mobile-menu-btn:active {
+.mobile-filters-btn:active {
   background: var(--fondo-card-hover);
 }
 
-.mobile-menu-btn.has-filters {
+.mobile-filters-btn.has-filters {
   border-color: var(--acento1);
   color: var(--acento1);
+}
+
+.mobile-filters-btn-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+@media (max-width: 380px) {
+  .mobile-filters-btn-label {
+    display: none;
+  }
 }
 
 .mobile-filters-badge {
@@ -506,6 +528,14 @@ body {
   transform: translateX(0);
 }
 
+.mobile-drawer-swipe-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--borde);
+  border-radius: 2px;
+  margin: 0.5rem auto;
+}
+
 .mobile-drawer-header {
   display: flex;
   align-items: center;
@@ -537,11 +567,55 @@ body {
   background: var(--fondo-card-hover);
 }
 
+.mobile-drawer-swipe-hint {
+  font-size: 0.75rem;
+  color: var(--texto-medio);
+  margin: 0 1rem 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--borde);
+}
+
 .mobile-drawer-body {
   overflow-y: auto;
-  height: calc(100% - 60px);
+  height: calc(100% - 100px);
   padding: 1rem;
   -webkit-overflow-scrolling: touch;
+}
+
+/* FAB para filtros en móvil */
+.mobile-fab-filters {
+  display: none;
+  position: fixed;
+  bottom: calc(70px + env(safe-area-inset-bottom));
+  right: 1rem;
+  z-index: 98;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--acento1) 0%, #00a8cc 100%);
+  color: var(--fondo);
+  box-shadow: 0 4px 16px rgba(0, 212, 255, 0.4);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mobile-fab-filters:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 1024px) {
+  .mobile-fab-filters {
+    display: flex;
+  }
+}
+
+@media (min-width: 1025px) {
+  .mobile-fab-filters {
+    display: none !important;
+  }
 }
 
 .filters-drawer-content {
