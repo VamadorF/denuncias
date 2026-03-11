@@ -23,8 +23,6 @@ const MAX_ESTABLECIMIENTOS = 5;
 
 interface ComparadorEstablecimientosProps {
   data: Denuncia[];
-  seleccionados: string[];
-  onToggle: (nombre: string) => void;
 }
 
 function countByKey(data: Denuncia[], key: keyof Denuncia): Record<string, number> {
@@ -37,11 +35,32 @@ function countByKey(data: Denuncia[], key: keyof Denuncia): Record<string, numbe
   return out;
 }
 
-export default function ComparadorEstablecimientos({
-  data,
-  seleccionados,
-  onToggle,
-}: ComparadorEstablecimientosProps) {
+export default function ComparadorEstablecimientos({ data }: ComparadorEstablecimientosProps) {
+  const [seleccionados, setSeleccionados] = useState<string[]>([]);
+  const [busqueda, setBusqueda] = useState("");
+
+  const toggleEstablecimiento = useCallback((nombre: string) => {
+    setSeleccionados((prev) => {
+      if (prev.includes(nombre)) return prev.filter((p) => p !== nombre);
+      if (prev.length >= MAX_ESTABLECIMIENTOS) return prev;
+      return [...prev, nombre];
+    });
+  }, []);
+
+  const establecimientos = useMemo(() => {
+    const set = new Set<string>();
+    data.forEach((d) => {
+      const n = d.EE_NOMBRE?.trim();
+      if (n && n !== "nan" && n.length > 0) set.add(n);
+    });
+    return Array.from(set).sort();
+  }, [data]);
+
+  const establecimientosFiltrados = useMemo(() => {
+    if (!busqueda.trim()) return establecimientos.slice(0, 30);
+    const q = busqueda.toLowerCase();
+    return establecimientos.filter((e) => e.toLowerCase().includes(q)).slice(0, 30);
+  }, [establecimientos, busqueda]);
 
   const datosPorEstablecimiento = useMemo(() => {
     const map = new Map<string, Denuncia[]>();
@@ -132,8 +151,54 @@ export default function ComparadorEstablecimientos({
         Comparador de Establecimientos
       </h3>
       <p className="comparador-desc">
-        Usa el selector en la barra lateral para elegir establecimientos. Los resultados aparecen aquí.
+        Selecciona entre 2 y {MAX_ESTABLECIMIENTOS} establecimientos para comparar denuncias, temas y evolución.
       </p>
+
+      <div className="comparador-selector">
+        <label>Buscar y seleccionar establecimientos (máx. {MAX_ESTABLECIMIENTOS}):</label>
+        <input
+          type="text"
+          className="comparador-busqueda"
+          placeholder="Escribe para buscar..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+        />
+        <div className="comparador-lista-opciones">
+          {establecimientosFiltrados.map((nombre) => {
+            const activo = seleccionados.includes(nombre);
+            const disabled = !activo && seleccionados.length >= MAX_ESTABLECIMIENTOS;
+            return (
+              <button
+                key={nombre}
+                type="button"
+                className={`comparador-opcion ${activo ? "activo" : ""} ${disabled ? "disabled" : ""}`}
+                onClick={() => !disabled && toggleEstablecimiento(nombre)}
+                title={nombre}
+              >
+                {nombre.length > 55 ? nombre.slice(0, 55) + "…" : nombre}
+              </button>
+            );
+          })}
+        </div>
+        {seleccionados.length > 0 && (
+          <div className="comparador-seleccionados">
+            <span className="comparador-seleccionados-label">Seleccionados:</span>
+            {seleccionados.map((nombre) => (
+              <span key={nombre} className="comparador-chip">
+                {nombre.length > 40 ? nombre.slice(0, 40) + "…" : nombre}
+                <button
+                  type="button"
+                  className="comparador-chip-remove"
+                  onClick={() => toggleEstablecimiento(nombre)}
+                  aria-label="Quitar"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
 
       {seleccionados.length >= 2 && (
         <>

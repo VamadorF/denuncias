@@ -1,6 +1,7 @@
 "use client";
 
-import { X, SlidersHorizontal, BarChart3, Building2, GitCompare, Table2, Home } from "lucide-react";
+import Link from "next/link";
+import { X, SlidersHorizontal, BarChart3, Building2, GitCompare, Table2, Home, ArrowLeft } from "lucide-react";
 
 interface MobileNavProps {
   filtersOpen: boolean;
@@ -8,13 +9,15 @@ interface MobileNavProps {
   hasActiveFilters: boolean;
   hasComparadorSelection?: boolean;
   filtersContent: React.ReactNode;
+  /** En la página del comparador no mostramos la barra inferior de secciones */
+  isComparadorPage?: boolean;
 }
 
-const SECTIONS = [
+const SECTIONS: { id: string; label: string; icon: typeof Home; href?: string }[] = [
   { id: "resumen", label: "Resumen", icon: Home },
   { id: "graficos", label: "Gráficos", icon: BarChart3 },
   { id: "establecimientos", label: "Top 20", icon: Building2 },
-  { id: "comparador", label: "Comparar", icon: GitCompare },
+  { id: "comparador", label: "Comparar", icon: GitCompare, href: "/comparador" },
   { id: "tabla", label: "Tabla", icon: Table2 },
 ];
 
@@ -24,6 +27,7 @@ export default function MobileNav({
   hasActiveFilters,
   hasComparadorSelection = false,
   filtersContent,
+  isComparadorPage = false,
 }: MobileNavProps) {
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -34,7 +38,14 @@ export default function MobileNav({
     <>
       <header className="mobile-topbar">
         <div className="mobile-topbar-inner">
-          <h1 className="mobile-logo">Denuncias Educativas</h1>
+          {isComparadorPage ? (
+            <Link href="/" className="mobile-logo-link">
+              <ArrowLeft size={22} />
+              <span>Volver</span>
+            </Link>
+          ) : (
+            <h1 className="mobile-logo">Denuncias Educativas</h1>
+          )}
           <button
             type="button"
             className={`mobile-menu-btn ${hasActiveFilters || hasComparadorSelection ? "has-filters" : ""}`}
@@ -55,7 +66,7 @@ export default function MobileNav({
 
       <aside className={`mobile-filters-drawer ${filtersOpen ? "open" : ""}`}>
         <div className="mobile-drawer-header">
-          <h2>Filtros y Comparador</h2>
+          <h2>{isComparadorPage ? "Filtros" : "Filtros y Comparador"}</h2>
           <button
             type="button"
             className="mobile-drawer-close"
@@ -68,20 +79,34 @@ export default function MobileNav({
         <div className="mobile-drawer-body">{filtersContent}</div>
       </aside>
 
-      <nav className="mobile-bottom-nav">
-        {SECTIONS.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            type="button"
-            className="mobile-nav-item"
-            onClick={() => scrollTo(id)}
-            aria-label={label}
-          >
-            <Icon size={22} strokeWidth={1.8} />
-            <span>{label}</span>
-          </button>
-        ))}
-      </nav>
+      {!isComparadorPage && (
+        <nav className="mobile-bottom-nav">
+          {SECTIONS.map(({ id, label, icon: Icon, href }) =>
+            href ? (
+              <Link
+                key={id}
+                href={href}
+                className="mobile-nav-item"
+                aria-label={label}
+              >
+                <Icon size={22} strokeWidth={1.8} />
+                <span>{label}</span>
+              </Link>
+            ) : (
+              <button
+                key={id}
+                type="button"
+                className="mobile-nav-item"
+                onClick={() => scrollTo(id)}
+                aria-label={label}
+              >
+                <Icon size={22} strokeWidth={1.8} />
+                <span>{label}</span>
+              </button>
+            )
+          )}
+        </nav>
+      )}
     </>
   );
 }

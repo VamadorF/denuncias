@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import {
   loadIndex,
   loadDenuncias,
@@ -17,11 +18,9 @@ import PieChart from "@/components/Charts/PieChart";
 import LineChart from "@/components/Charts/LineChart";
 import TopEstablecimientos from "@/components/TopEstablecimientos";
 import DetalleEstablecimiento from "@/components/DetalleEstablecimiento";
-import ComparadorEstablecimientos from "@/components/ComparadorEstablecimientos";
-import ComparadorSelector from "@/components/ComparadorSelector";
 import MobileNav from "@/components/MobileNav";
 import { useIsMobile } from "@/lib/useMediaQuery";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, GitCompare } from "lucide-react";
 
 function countBy(
   data: Denuncia[],
@@ -48,17 +47,7 @@ export default function DashboardPage() {
   const [tipoEvolucion, setTipoEvolucion] = useState<"Líneas" | "Barras">("Líneas");
   const [tablaExpanded, setTablaExpanded] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [comparadorSeleccionados, setComparadorSeleccionados] = useState<string[]>([]);
-  const [comparadorBusqueda, setComparadorBusqueda] = useState("");
   const isMobile = useIsMobile();
-
-  const toggleComparadorEstablecimiento = (nombre: string) => {
-    setComparadorSeleccionados((prev) => {
-      if (prev.includes(nombre)) return prev.filter((p) => p !== nombre);
-      if (prev.length >= 5) return prev;
-      return [...prev, nombre];
-    });
-  };
 
   const añosDisponibles = index?.años ?? [];
 
@@ -251,31 +240,15 @@ export default function DashboardPage() {
           filtersOpen={filtersOpen}
           onFiltersToggle={() => setFiltersOpen((o) => !o)}
           hasActiveFilters={hasFilters}
-          hasComparadorSelection={comparadorSeleccionados.length >= 2}
-          filtersContent={
-            <>
-              <Filters {...filtersProps} inDrawer />
-              <ComparadorSelector
-                data={filtered}
-                seleccionados={comparadorSeleccionados}
-                onToggle={toggleComparadorEstablecimiento}
-                busqueda={comparadorBusqueda}
-                onBusquedaChange={setComparadorBusqueda}
-                compact
-              />
-            </>
-          }
+          filtersContent={<Filters {...filtersProps} inDrawer />}
         />
       ) : (
         <aside className="filters-sidebar">
           <Filters {...filtersProps} inSidebar />
-          <ComparadorSelector
-            data={filtered}
-            seleccionados={comparadorSeleccionados}
-            onToggle={toggleComparadorEstablecimiento}
-            busqueda={comparadorBusqueda}
-            onBusquedaChange={setComparadorBusqueda}
-          />
+          <Link href="/comparador" className="comparador-sidebar-btn">
+            <GitCompare size={20} />
+            Ir al Comparador
+          </Link>
         </aside>
       )}
       <main className="main-content">
@@ -373,14 +346,6 @@ export default function DashboardPage() {
 
         <DetalleEstablecimiento data={filtered} tipoChart={tipoDistribucion} />
 
-        </section>
-
-        <section id="comparador">
-        <ComparadorEstablecimientos
-          data={filtered}
-          seleccionados={comparadorSeleccionados}
-          onToggle={toggleComparadorEstablecimiento}
-        />
         </section>
 
         <section id="tabla">

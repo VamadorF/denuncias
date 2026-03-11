@@ -419,6 +419,21 @@ body {
   white-space: nowrap;
 }
 
+.mobile-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--acento1);
+  text-decoration: none;
+  flex: 1;
+}
+
+.mobile-logo-link:hover {
+  color: var(--acento2);
+}
+
 .mobile-menu-btn {
   display: flex;
   align-items: center;
@@ -846,6 +861,67 @@ body {
 
 .comparador-chart {
   margin-bottom: 2rem;
+}
+
+/* Botón Ir al Comparador en sidebar del dashboard */
+.comparador-sidebar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(0, 255, 136, 0.08) 100%);
+  border: 1px solid var(--acento1);
+  border-radius: 10px;
+  color: var(--acento1);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.comparador-sidebar-btn:hover {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.25) 0%, rgba(0, 255, 136, 0.12) 100%);
+  border-color: var(--acento2);
+  color: var(--acento2);
+}
+
+/* Botón volver en página comparador */
+.comparador-sidebar-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  margin-bottom: 1rem;
+  background: var(--fondo-card);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  color: var(--acento1);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.comparador-sidebar-back:hover {
+  background: var(--fondo-card-hover);
+  border-color: var(--acento1);
+}
+
+.comparador-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  color: var(--acento1);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.comparador-back-link:hover {
+  color: var(--acento2);
 }
 
 /* Comparador en sidebar */
