@@ -6,6 +6,7 @@ interface MobileNavProps {
   filtersOpen: boolean;
   onFiltersToggle: () => void;
   hasActiveFilters: boolean;
+  hasComparadorSelection?: boolean;
   filtersContent: React.ReactNode;
 }
 
@@ -21,6 +22,7 @@ export default function MobileNav({
   filtersOpen,
   onFiltersToggle,
   hasActiveFilters,
+  hasComparadorSelection = false,
   filtersContent,
 }: MobileNavProps) {
   const scrollTo = (id: string) => {
@@ -35,7 +37,7 @@ export default function MobileNav({
           <h1 className="mobile-logo">Denuncias Educativas</h1>
           <button
             type="button"
-            className={`mobile-menu-btn ${hasActiveFilters ? "has-filters" : ""}`}
+            className={`mobile-menu-btn ${hasActiveFilters || hasComparadorSelection ? "has-filters" : ""}`}
             onClick={onFiltersToggle}
             aria-label={filtersOpen ? "Cerrar filtros" : "Abrir filtros"}
           >
@@ -53,7 +55,7 @@ export default function MobileNav({
 
       <aside className={`mobile-filters-drawer ${filtersOpen ? "open" : ""}`}>
         <div className="mobile-drawer-header">
-          <h2>Filtros</h2>
+          <h2>Filtros y Comparador</h2>
           <button
             type="button"
             className="mobile-drawer-close"

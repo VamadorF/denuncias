@@ -8,6 +8,8 @@ interface FiltersProps {
   filtros: Filtros;
   onChange: (f: Filtros) => void;
   inDrawer?: boolean;
+  /** Cuando está dentro de un aside (sidebar con comparador) */
+  inSidebar?: boolean;
   añosDisponibles: number[];
   regiones: string[];
   comunas: string[];
@@ -27,6 +29,7 @@ export default function Filters({
   filtros,
   onChange,
   inDrawer = false,
+  inSidebar = false,
   añosDisponibles,
   regiones,
   comunas,
@@ -45,8 +48,8 @@ export default function Filters({
     onChange({ ...filtros, ...partial });
   };
 
-  const Wrapper = inDrawer ? "div" : "aside";
-  const wrapperClass = inDrawer ? "filters-drawer-content" : "filters-sidebar";
+  const Wrapper = inDrawer || inSidebar ? "div" : "aside";
+  const wrapperClass = inDrawer ? "filters-drawer-content" : inSidebar ? "filters-sidebar-content" : "filters-sidebar";
 
   return (
     <Wrapper className={wrapperClass}>

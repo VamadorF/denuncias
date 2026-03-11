@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { Denuncia } from "@/lib/data";
 import {
-  BarChart,
+  BarChart as RechartsBarChart,
   Bar,
   XAxis,
   YAxis,
@@ -17,11 +17,14 @@ import {
 import { COLORS } from "@/lib/constants";
 import { MESES } from "@/lib/constants";
 import { GitCompare } from "lucide-react";
+import BarChart from "./Charts/BarChart";
 
 const MAX_ESTABLECIMIENTOS = 5;
 
 interface ComparadorEstablecimientosProps {
   data: Denuncia[];
+  seleccionados: string[];
+  onToggle: (nombre: string) => void;
 }
 
 function countByKey(data: Denuncia[], key: keyof Denuncia): Record<string, number> {
@@ -34,32 +37,11 @@ function countByKey(data: Denuncia[], key: keyof Denuncia): Record<string, numbe
   return out;
 }
 
-export default function ComparadorEstablecimientos({ data }: ComparadorEstablecimientosProps) {
-  const establecimientos = useMemo(() => {
-    const set = new Set<string>();
-    data.forEach((d) => {
-      const n = d.EE_NOMBRE?.trim();
-      if (n && n !== "nan" && n.length > 0) set.add(n);
-    });
-    return Array.from(set).sort();
-  }, [data]);
-
-  const [seleccionados, setSeleccionados] = useState<string[]>([]);
-  const [busqueda, setBusqueda] = useState("");
-
-  const toggleEstablecimiento = useCallback((nombre: string) => {
-    setSeleccionados((prev) => {
-      if (prev.includes(nombre)) return prev.filter((p) => p !== nombre);
-      if (prev.length >= MAX_ESTABLECIMIENTOS) return prev;
-      return [...prev, nombre];
-    });
-  }, []);
-
-  const establecimientosFiltrados = useMemo(() => {
-    if (!busqueda.trim()) return establecimientos.slice(0, 30);
-    const q = busqueda.toLowerCase();
-    return establecimientos.filter((e) => e.toLowerCase().includes(q)).slice(0, 30);
-  }, [establecimientos, busqueda]);
+export default function ComparadorEstablecimientos({
+  data,
+  seleccionados,
+  onToggle,
+}: ComparadorEstablecimientosProps) {
 
   const datosPorEstablecimiento = useMemo(() => {
     const map = new Map<string, Denuncia[]>();
@@ -150,54 +132,8 @@ export default function ComparadorEstablecimientos({ data }: ComparadorEstableci
         Comparador de Establecimientos
       </h3>
       <p className="comparador-desc">
-        Selecciona entre 2 y {MAX_ESTABLECIMIENTOS} establecimientos para comparar denuncias, temas y evolución.
+        Usa el selector en la barra lateral para elegir establecimientos. Los resultados aparecen aquí.
       </p>
-
-      <div className="comparador-selector">
-        <label>Buscar y seleccionar establecimientos (máx. {MAX_ESTABLECIMIENTOS}):</label>
-        <input
-          type="text"
-          className="comparador-busqueda"
-          placeholder="Escribe para buscar..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-        />
-        <div className="comparador-lista-opciones">
-          {establecimientosFiltrados.map((nombre) => {
-            const activo = seleccionados.includes(nombre);
-            const disabled = !activo && seleccionados.length >= MAX_ESTABLECIMIENTOS;
-            return (
-              <button
-                key={nombre}
-                type="button"
-                className={`comparador-opcion ${activo ? "activo" : ""} ${disabled ? "disabled" : ""}`}
-                onClick={() => !disabled && toggleEstablecimiento(nombre)}
-                title={nombre}
-              >
-                {nombre.length > 55 ? nombre.slice(0, 55) + "…" : nombre}
-              </button>
-            );
-          })}
-        </div>
-        {seleccionados.length > 0 && (
-          <div className="comparador-seleccionados">
-            <span className="comparador-seleccionados-label">Seleccionados:</span>
-            {seleccionados.map((nombre) => (
-              <span key={nombre} className="comparador-chip">
-                {nombre.length > 40 ? nombre.slice(0, 40) + "…" : nombre}
-                <button
-                  type="button"
-                  className="comparador-chip-remove"
-                  onClick={() => toggleEstablecimiento(nombre)}
-                  aria-label="Quitar"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
 
       {seleccionados.length >= 2 && (
         <>
@@ -229,12 +165,28 @@ export default function ComparadorEstablecimientos({ data }: ComparadorEstableci
             </div>
           </div>
 
+          {/* Gráfico de total de denuncias por establecimiento */}
+          <div className="comparador-chart comparador-total-chart">
+            <h4>Total de denuncias por establecimiento</h4>
+            <BarChart
+              data={metricasComparacion.map((m) => ({
+                name: m.nombreFull,
+                value: m.total,
+              }))}
+              horizontal
+              height={Math.max(200, seleccionados.length * 80)}
+              labelWidth={220}
+              labelMaxLength={40}
+              colors={COLORS.slice(0, seleccionados.length)}
+            />
+          </div>
+
           {temasComparacion.length > 0 && (
             <div className="comparador-chart">
               <h4>Comparación por Tema</h4>
               <div className="chart-container" style={{ height: 400 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
+                  <RechartsBarChart
                     data={temasComparacion}
                     margin={{ top: 16, right: 24, left: 8, bottom: 120 }}
                   >
@@ -272,10 +224,10 @@ export default function ComparadorEstablecimientos({ data }: ComparadorEstableci
                         name={key}
                         fill={COLORS[i % COLORS.length]}
                         radius={[0, 0, 0, 0]}
-                        maxBarSize={32}
+                        maxBarSize={45}
                       />
                     ))}
-                  </BarChart>
+                  </RechartsBarChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -286,7 +238,7 @@ export default function ComparadorEstablecimientos({ data }: ComparadorEstableci
               <h4>Comparación por Ámbito</h4>
               <div className="chart-container" style={{ height: 320 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
+                  <RechartsBarChart
                     data={ambitosComparacion}
                     margin={{ top: 16, right: 24, left: 8, bottom: 80 }}
                   >
@@ -324,10 +276,10 @@ export default function ComparadorEstablecimientos({ data }: ComparadorEstableci
                         name={key}
                         fill={COLORS[i % COLORS.length]}
                         radius={[0, 0, 0, 0]}
-                        maxBarSize={32}
+                        maxBarSize={45}
                       />
                     ))}
-                  </BarChart>
+                  </RechartsBarChart>
                 </ResponsiveContainer>
               </div>
             </div>

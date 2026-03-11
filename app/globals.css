@@ -77,6 +77,14 @@ body {
   border-right: 1px solid var(--borde);
   padding: 1.5rem 1rem;
   animation: fadeInUp 0.4s ease-out;
+  overflow-y: auto;
+}
+
+.filters-sidebar-content {
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: 100%;
 }
 
 .filters-header {
@@ -838,6 +846,70 @@ body {
 
 .comparador-chart {
   margin-bottom: 2rem;
+}
+
+/* Comparador en sidebar */
+.comparador-selector-sidebar {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--borde);
+}
+
+.comparador-sidebar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.35rem 0;
+  color: var(--texto-claro);
+}
+
+.comparador-sidebar-desc {
+  font-size: 0.8rem;
+  color: var(--texto-medio);
+  margin: 0 0 0.75rem 0;
+}
+
+.comparador-seleccionados-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.comparador-seleccionados-sidebar .comparador-seleccionados-label {
+  font-size: 0.8rem;
+}
+
+.comparador-seleccionados-sidebar .comparador-chip {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.5rem;
+}
+
+.comparador-lista-opciones.compact {
+  max-height: 100px;
+}
+
+/* Comparador en drawer móvil */
+.filters-drawer-content + .comparador-selector-sidebar {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--borde);
+}
+
+@media (max-width: 1024px) {
+  .comparador-selector-sidebar .comparador-busqueda {
+    max-width: 100%;
+  }
+
+  .comparador-section .comparador-desc {
+    font-size: 0.85rem;
+  }
+
+  .comparador-total-chart .chart-container {
+    min-height: 180px;
+  }
 }
 
 .loading {

@@ -57,7 +57,6 @@ export default function BarChart({
               ? { top: 20, right: 40, left: 12, bottom: 20 }
               : { top: 24, right: 24, left: 16, bottom: 100 }
           }
-          barCategoryGap={horizontal ? 12 : undefined}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--borde)" opacity={0.5} />
           {horizontal ? (
@@ -118,7 +117,7 @@ export default function BarChart({
             dataKey="value"
             radius={[0, 4, 4, 0]}
             fill="var(--acento1)"
-            maxBarSize={36}
+            maxBarSize={45}
             label={{
               position: horizontal ? "right" : "top",
               fill: "var(--texto-claro)",

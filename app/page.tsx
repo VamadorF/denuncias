@@ -18,6 +18,7 @@ import LineChart from "@/components/Charts/LineChart";
 import TopEstablecimientos from "@/components/TopEstablecimientos";
 import DetalleEstablecimiento from "@/components/DetalleEstablecimiento";
 import ComparadorEstablecimientos from "@/components/ComparadorEstablecimientos";
+import ComparadorSelector from "@/components/ComparadorSelector";
 import MobileNav from "@/components/MobileNav";
 import { useIsMobile } from "@/lib/useMediaQuery";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -47,7 +48,17 @@ export default function DashboardPage() {
   const [tipoEvolucion, setTipoEvolucion] = useState<"Líneas" | "Barras">("Líneas");
   const [tablaExpanded, setTablaExpanded] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [comparadorSeleccionados, setComparadorSeleccionados] = useState<string[]>([]);
+  const [comparadorBusqueda, setComparadorBusqueda] = useState("");
   const isMobile = useIsMobile();
+
+  const toggleComparadorEstablecimiento = (nombre: string) => {
+    setComparadorSeleccionados((prev) => {
+      if (prev.includes(nombre)) return prev.filter((p) => p !== nombre);
+      if (prev.length >= 5) return prev;
+      return [...prev, nombre];
+    });
+  };
 
   const añosDisponibles = index?.años ?? [];
 
@@ -240,12 +251,32 @@ export default function DashboardPage() {
           filtersOpen={filtersOpen}
           onFiltersToggle={() => setFiltersOpen((o) => !o)}
           hasActiveFilters={hasFilters}
+          hasComparadorSelection={comparadorSeleccionados.length >= 2}
           filtersContent={
-            <Filters {...filtersProps} inDrawer />
+            <>
+              <Filters {...filtersProps} inDrawer />
+              <ComparadorSelector
+                data={filtered}
+                seleccionados={comparadorSeleccionados}
+                onToggle={toggleComparadorEstablecimiento}
+                busqueda={comparadorBusqueda}
+                onBusquedaChange={setComparadorBusqueda}
+                compact
+              />
+            </>
           }
         />
       ) : (
-        <Filters {...filtersProps} />
+        <aside className="filters-sidebar">
+          <Filters {...filtersProps} inSidebar />
+          <ComparadorSelector
+            data={filtered}
+            seleccionados={comparadorSeleccionados}
+            onToggle={toggleComparadorEstablecimiento}
+            busqueda={comparadorBusqueda}
+            onBusquedaChange={setComparadorBusqueda}
+          />
+        </aside>
       )}
       <main className="main-content">
         <header className="main-header">
@@ -345,7 +376,11 @@ export default function DashboardPage() {
         </section>
 
         <section id="comparador">
-        <ComparadorEstablecimientos data={filtered} />
+        <ComparadorEstablecimientos
+          data={filtered}
+          seleccionados={comparadorSeleccionados}
+          onToggle={toggleComparadorEstablecimiento}
+        />
         </section>
 
         <section id="tabla">
